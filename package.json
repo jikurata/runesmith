@@ -1,0 +1,19 @@
+{
+  "name": "runesmith",
+  "version": "0.0.0",
+  "description": "Compile html from templates and imports",
+  "main": "index.js",
+  "scripts": {
+    "test": "node ./test/runesmith.test.js"
+  },
+  "keywords": [
+    "runesmith",
+    "html",
+    "compile"
+  ],
+  "author": "jikurata",
+  "license": "ISC",
+  "devDependencies": {
+    "@jikurata/taste": "0.0.6"
+  }
+}
