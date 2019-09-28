@@ -4,7 +4,9 @@
   "description": "Compile html from templates and imports",
   "main": "index.js",
   "scripts": {
-    "test": "node ./test/runesmith.test.js"
+    "test:util": "node ./test/util.test.js",
+    "test:runesmith": "node ./test/runesmith.test.js",
+    "test": "npm run test:util && npm run test:runesmith"
   },
   "keywords": [
     "runesmith",
@@ -15,5 +17,8 @@
   "license": "ISC",
   "devDependencies": {
     "@jikurata/taste": "0.0.6"
+  },
+  "dependencies": {
+    "@jikurata/html-parser": "0.0.0"
   }
 }
