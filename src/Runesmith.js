@@ -117,6 +117,9 @@ class Runesmith extends EventEmitter {
 
     // Import rune
     this.rune('import', (document) => {
+      if ( !document.fileStack ) {
+        document.fileStack = [];
+      }
       const currdir = document.currdir || fsUtil.getProjectRoot();
       const namespace = document.namespace || {};
 
@@ -126,11 +129,17 @@ class Runesmith extends EventEmitter {
         const importElement = importElements.pop();
         const src = importElement.getAttribute('src');
         const filepath = fsUtil.resolveToProjectPath(currdir, src);
-        let importHtml = this.compile(filepath,{
+
+        // Check for circular imports
+        Errors.CircularCompileError.check(document.fileStack, filepath);
+        document.fileStack.push(filepath);
+
+        let importHtml = this.compile(filepath, {
+          fileStack: document.fileStack,
           currdir: currdir,
           namespace: namespace
         });
-        
+
         // Convert the imported html into a htmldocument
         const importDocument = htmlParser(importHtml);
         importDocument.config({trimWhitespace: document.trimWhitespace});
@@ -200,6 +209,7 @@ class Runesmith extends EventEmitter {
     const currdir = options.currdir || fsUtil.getProjectRoot();
     const namespace = options.namespace || {};
     const filepath = fsUtil.resolveToProjectPath(currdir, file);
+    const fileStack = options.fileStack || [filepath];
     let content = '';
 
     // Retrieve contents of html file
@@ -213,6 +223,7 @@ class Runesmith extends EventEmitter {
     }
 
     const document = htmlParser(html);
+    document.fileStack = fileStack;
     document.namespace = namespace;
     document.currdir = fsUtil.currdir(filepath);
     
@@ -226,6 +237,8 @@ class Runesmith extends EventEmitter {
     };
 
     content = this.parse(document);
+        
+    document.fileStack.pop();
 
     this.map[filepath].namespace = document.namespace;
     this.map[filepath].contentLength = content.length;
