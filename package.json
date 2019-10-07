@@ -1,8 +1,9 @@
 {
   "name": "runesmith",
   "version": "0.0.0",
-  "description": "Compile html from templates and imports",
+  "description": "Compile html from imports",
   "main": "index.js",
+  "repository": "https://github.com/jikurata/runesmith",
   "scripts": {
     "test:util": "node ./test/util.test.js",
     "test:rune": "node ./test/rune.test.js",
@@ -20,6 +21,6 @@
     "@jikurata/taste": "0.0.6"
   },
   "dependencies": {
-    "@jikurata/html-parser": "0.0.2"
+    "@jikurata/html-parser": "0.0.3"
   }
 }

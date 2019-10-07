@@ -7,7 +7,7 @@ const Rune = require('./Rune.js');
 const init = Symbol('init');
 
 class Runesmith extends EventEmitter {
-  constructor(options = {}) {
+  constructor() {
     super();
     Object.defineProperty(this, 'runes', {
       value: {},
@@ -23,12 +23,6 @@ class Runesmith extends EventEmitter {
     });
     Object.defineProperty(this, 'map', {
       value: {},
-      enumerable: true,
-      writable: false,
-      configurable: false
-    });
-    Object.defineProperty(this, 'config', {
-      value: options || {},
       enumerable: true,
       writable: false,
       configurable: false
@@ -127,29 +121,33 @@ class Runesmith extends EventEmitter {
       const namespace = document.namespace || {};
 
       // Parse import elements
-      let importElements = document.fragment.getElementsByTagName('import');
+      let importElements = document.getElementsByTagName('import');
       while ( importElements.length ) {
         const importElement = importElements.pop();
         const src = importElement.getAttribute('src');
         const filepath = fsUtil.resolveToProjectPath(currdir, src);
-        let importContent = this.compile(filepath,{
+        let importHtml = this.compile(filepath,{
           currdir: currdir,
           namespace: namespace
         });
         
-        // Append the innerHTML of the import tag into any content tags in the import
-        const importDocument = htmlParser(importContent);
+        // Convert the imported html into a htmldocument
+        const importDocument = htmlParser(importHtml);
         importDocument.config({trimWhitespace: document.trimWhitespace});
+
+        // Append the innerHTML of the import tag into any content tags in the import
         const contentElements = importDocument.getElementsByTagName('content');
         for ( let i = 0; i < contentElements.length; ++i ) {
           const e = contentElements[i];
-          e.parent.replaceChild(e, importElement.children);
+          importDocument.fragment.replaceChild(e, importElement.children);
+          importDocument.deleteElement(e);
         }
+
         // Replace import tag with its compiled import
         document.fragment.replaceChild(importElement, importDocument.fragment.children);
-
+        document.deleteElement(importElement);
         // Update the array of import elements
-        importElements = document.fragment.getElementsByTagName('import');
+        importElements = document.getElementsByTagName('import');
       }
     });
   }
@@ -180,14 +178,14 @@ class Runesmith extends EventEmitter {
   /**
    * Calls all runes associated with the tag
    * @param {String} tag 
-   * @param {ParsedElement} element 
+   * @param {ParsedHTMLDocument} document 
    */
-  invoke(tag, element) {
+  invoke(tag, document) {
     if ( this.runes.hasOwnProperty(tag) ) {
       const runes = this.runes[tag];
       for ( let i = 0; i < runes.length; ++i ) {
         const rune = runes[i];
-        rune.inscribe(element);
+        rune.inscribe(document);
       }
     }
   }
@@ -236,29 +234,21 @@ class Runesmith extends EventEmitter {
   }
 
   parse(document) {
-    // Check for namespace elements
+    // Pass the document through the namespace rune
     this.invoke('namespace', document);
     
-    // Check for var elements
+    // Pass the document through the var rune
     this.invoke('var', document);
 
-    // Check for import elements
+    // Pass the document through the import rune
     this.invoke('import', document);
 
-    // Pass content through each rune
+    // Pass the document through any custom runes
     const keys = Object.keys(this.runes);
     for ( let i = 0; i < keys.length; ++i ) {
       const key = keys[i];
-      if ( key === 'namespace' || key === 'var' || key === 'import' ) {
-        continue;
-      }
-      const rune = this.runes[keys[i]]
-      const elements = document.getElementsByTagName(key);
-      for ( let j = 0; j < elements.length; ++j ) {
-        const element = elements[i];
-        const result = rune.invoke(element) || '';
-        const substring = content.substring(element.source.startIndex, element.source.endIndex);
-        content = content.replace(substring, result);
+      if ( key !== 'namespace' && key !== 'var' && key !== 'import' ) {
+        this.invoke(key, document);
       }
     }
 

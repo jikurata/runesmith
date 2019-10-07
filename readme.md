@@ -10,10 +10,17 @@ npm install runesmith
 ---
 ```
 const Runesmith = require('runesmith');
-
-Runesmith.compile();
+const filepath = file/path/to/some/file.html
+const result = Runesmith(filepath); // returns compiled html as a String
 ```
-Expand Runesmith's vocabulary by creating words of power
+Expand Runesmith's vocabulary by adding your own runes
 ```
-Runesmith.rune('gallery', file/path/to/gallery.html);
+Runesmith.rune('foo', (document) => {
+    // modify the html document in some way
+    const p = document.getElementsTagName('p')[0];
+    p.innerHTML = 'foobar';
+});
 ```
+## Version History
+**v0.0.0**
+- TODO: Implement configurations to make Runesmith more flexible
