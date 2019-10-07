@@ -5,8 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test:util": "node ./test/util.test.js",
+    "test:rune": "node ./test/rune.test.js",
     "test:runesmith": "node ./test/runesmith.test.js",
-    "test": "npm run test:util && npm run test:runesmith"
+    "test": "npm run test:util && npm run test:rune && npm run test:runesmith"
   },
   "keywords": [
     "runesmith",
@@ -19,6 +20,6 @@
     "@jikurata/taste": "0.0.6"
   },
   "dependencies": {
-    "@jikurata/html-parser": "0.0.0"
+    "@jikurata/html-parser": "0.0.2"
   }
 }

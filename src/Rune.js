@@ -1,68 +1,31 @@
 'use strict';
+const Errors = require('./Error.js');
 const EventEmitter = require('events');
-const fsUtil = require('./fs-util.js');
-const init = Symbol('init');
 
 class Rune extends EventEmitter {
   /**
-   * @param {Runesmith} runesmith
-   * @param {String} tag
-   * @param {String|Filepath} source,
-   * @param {RuneOptions} options
+   * @param {ParsedHTMLDocument} document
+   * @param {Function} handler,
    */
-  constructor(runesmith, tag, options = {}) {
+  constructor(handler) {
     super();
-    Object.defineProperty(this, 'runesmith', {
-      value: runesmith,
+    Object.defineProperty(this, 'handler', {
+      value: handler,
       enumerable: true,
       writable: false,
       configurable: false
     });
-    Object.defineProperty(this, 'tag', {
-      value: tag,
-      enumerable: true,
-      writable: false,
-      configurable: false
-    });
-    Object.defineProperty(this, 'effect', {
-      value: options.effect || [],
-      enumerable: true,
-      writable: false,
-      configurable: false
-    });
-    Object.defineProperty(this, 'source', {
-      value: options.source || null,
-      enumerable: true,
-      writable: false,
-      configurable: false
-    });
-    Object.defineProperty(this, 'partial', {
-      value: options.partial || null,
-      enumerable: true,
-      writable: false,
-      configurable: false
-    });
-    this[init]();
-  }
-
-  [init]() {
-    // Save the partial from source if available
-    if ( !this.partial && this.source ) {
-      this.partial = fsUtil.readHtmlFile(this.source);
-    }
   }
 
   /**
-   * Process the element and return the results
-   * @param {ParsedElement} element
-   * @returns {String}
+   * Executes the handler function
+   * @param {ParsedHTMLDocument} document
+   * @returns {ParsedHTMLDocument}
    */
-  invoke(element) {
-    let partial = this.partial;
-    for ( let i = 0; i < this.effect.length; ++i ) {
-      partial = this.effect[i](partial, element);
-    }
-    return partial;
+  inscribe(document) {
+    Errors.TypeError.check(this.handler, 'function');
+    this.handler(document);
+    return document;
   }
 }
 

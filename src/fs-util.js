@@ -114,6 +114,10 @@ function resolveToProjectPath(...paths) {
   }
   return resolve(getProjectRoot(), rpath);
 }
+
+function currdir(path) {
+  return resolve(path, '../');
+}
   
 /**
  * Reads contents of html file
@@ -137,5 +141,6 @@ module.exports = {
   getProjectRoot: getProjectRoot,
   resolve: resolve,
   resolveToProjectPath: resolveToProjectPath,
-  readHtmlFile: readHtmlFile
+  readHtmlFile: readHtmlFile,
+  currdir: currdir
 };

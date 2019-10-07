@@ -1,21 +1,26 @@
 'use strict';
 
-class InvalidTag extends TypeError {
-  constructor(tag) {
-    super(`Received invalid tag ${tag}. A tag must be a truthy string`);
-    this.tag = tag;
+class RunesmithTypeError extends TypeError {
+  constructor(value, type) {
+    super(`Expected type ${type}, but received ${value} (type: ${typeof value})`);
+    this.type = type;
+    this.value = value;
   }
 
-  /**
-   * Throws an InvalidTag Error if tag is not a tag
-   * @param {String} tag 
-   */
-  static isValidTag(tag) {
-    if ( typeof tag !== 'string' || !tag.trim() ) {
-      throw new InvalidTag(tag);
+  static check(value, type) {
+    if ( typeof value !== type ) {
+      throw new RunesmithTypeError(value, type);
     }
   }
 }
 
+class InvalidTag extends RunesmithTypeError {
+  constructor(tag) {
+    super(tag, 'string');
+    this.tag = tag;
+  }
+}
 
+
+module.exports.TypeError = RunesmithTypeError;
 module.exports.InvalidTag = InvalidTag;
