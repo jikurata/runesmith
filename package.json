@@ -1,7 +1,7 @@
 {
   "name": "runesmith",
   "version": "0.0.0",
-  "description": "Compile html from imports",
+  "description": "Parse and compile html files",
   "main": "index.js",
   "repository": "https://github.com/jikurata/runesmith",
   "scripts": {
