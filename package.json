@@ -8,7 +8,8 @@
     "test:util": "node ./test/util.test.js",
     "test:rune": "node ./test/rune.test.js",
     "test:runesmith": "node ./test/runesmith.test.js",
-    "test": "npm run test:util && npm run test:rune && npm run test:runesmith"
+    "test:index": "node ./test/index.test.js",
+    "test": "npm run test:util && npm run test:rune && npm run test:runesmith && npm run test:index"
   },
   "keywords": [
     "runesmith",

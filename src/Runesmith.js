@@ -31,7 +31,6 @@ class Runesmith extends EventEmitter {
   }
 
   [init]() {
-    // TODO: refactor so runes accept a html document as an argument instead of just an element
     // Namespace rune
     this.rune('namespace', (document) => {
       if ( !document.hasOwnProperty('namespace') ) {
