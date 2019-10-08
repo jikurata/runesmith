@@ -140,20 +140,21 @@ class Runesmith extends EventEmitter {
         });
 
         // Convert the imported html into a htmldocument
-        const importDocument = htmlParser(importHtml);
+        const importDocument = document.parse(importHtml);
         importDocument.config({trimWhitespace: document.trimWhitespace});
 
         // Append the innerHTML of the import tag into any content tags in the import
         const contentElements = importDocument.getElementsByTagName('content');
         for ( let i = 0; i < contentElements.length; ++i ) {
-          const e = contentElements[i];
-          importDocument.fragment.replaceChild(e, importElement.children);
-          importDocument.deleteElement(e);
+          const element = contentElements[i];
+          element.parent.replaceChild(element, importElement.children);
+          importDocument.deleteElement(element);
         }
 
         // Replace import tag with its compiled import
-        document.fragment.replaceChild(importElement, importDocument.fragment.children);
+        importElement.parent.replaceChild(importElement, importDocument.fragment.children);
         document.deleteElement(importElement);
+        
         // Update the array of import elements
         importElements = document.getElementsByTagName('import');
       }

@@ -102,7 +102,7 @@ Taste.flavor('Var rune')
   rune.inscribe(document);
   profile.html = document.stringify();
 })
-.expect('html').toMatch('<div>bar</div>baz');
+.expect('html').toEqual('<div>bar</div>baz');
 
 Taste.flavor('Import rune')
 .describe('Parses import elements and replaces the element with content of its import')
@@ -120,7 +120,7 @@ Taste.flavor('Import rune')
   rune.inscribe(document);
   profile.html = document.stringify().trim();
 })
-.expect('html').toMatch('<p>foo</p><p>foobar</p><span>additional text</span>');
+.expect('html').toEqual('<p>foo</p><p>foobar</p><span>additional text</span>');
 
 Taste.flavor('Import rune')
 .describe('Handles nested imports')
@@ -141,4 +141,4 @@ Taste.flavor('Import rune')
   rune.inscribe(document);
   profile.html = document.stringify().trim();
 })
-.expect('html').toMatch('<p>foo</p><p>foobar</p><span>additional text</span><span>bax</span>baz');
+.expect('html').toEqual('<p>foo</p><p>foobar</p><span>additional text</span><span>bax</span>baz');
