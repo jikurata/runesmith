@@ -132,26 +132,18 @@ function mergePaths(p1, p2) {
   const index = A.indexOf(B[0]);
   // If array1 contains the first element of array 2, begin comparing for sameness starting at index
   if ( index > -1 ) {
+    const merged = A.slice(0, index);
     // Once a match is found, all subsequent indexes of both arrays must have matching values until the end of either array is reached
-    let sequentialMatch = true;
+    let indexA = index;
     for ( let i = 0; i < B.length; ++i ) {
-      const indexA = index + i;
-      // Stop comparing if at the end of a1
-      if ( indexA >= A.length - 1 ) {
+      // Stop comparing if at the end of a1 or if the paths are no longer sequentially the same
+      if ( indexA >= A.length - 1 || B[i] !== A[indexA] ) {
         break;
       }
-      // Paths are not sequentially the same
-      if ( B[i] !== A[indexA] ) {
-        sequentialMatch = false;
-        break;
-      }
+      indexA++;
     }
 
-    // Merge the matches 
-    if ( sequentialMatch ) {
-      const merged = A.slice(0, index);
-      return PATH.join(merged.join(PATH.sep), B.join(PATH.sep));
-    }
+    return PATH.join(merged.join(PATH.sep), B.join(PATH.sep));
   }
 
   return PATH.join(p1, p2);

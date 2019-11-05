@@ -22,7 +22,7 @@ const test = new Promise((resolve, reject) => {
   })
   .expect('merge1').toEqual(PATH.normalize('this/is/a/path/to/file'))
   .expect('merge2').toEqual(PATH.normalize('this/is/a/path/to/file'))
-  .expect('merge3').toEqual(PATH.normalize('this/is/a/path/this/is/also/a/path'))
+  .expect('merge3').toEqual(PATH.normalize('this/is/also/a/path'))
   .expect('merge4').toEqual(PATH.normalize('this/is/also/a/path'))
   .expect('merge5').toEqual(PATH.normalize('this/is/a/path/too'));
 
