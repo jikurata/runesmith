@@ -1,4 +1,4 @@
-# Runesmith v0.0.1
+# Runesmith v0.0.2
 Parse and compile html files
 ---
 ## Install
@@ -21,7 +21,7 @@ Import html files as partials or as templates
 ```
 <import src="a/path/to/file.html"></import>
 ```
-If the filepath provided in src is a relative path, it will attempt to resolve the path with the current directory, and then with the project root directory.
+Absolute filepaths are resolved to the project root directory.
 
 When the parser identifies an import tag, it will read the contents of src and then replace the tag with src's content. Furthermore, the children of the import tag will be appended into the src if it contains a content tag:
 ```
@@ -168,6 +168,9 @@ Result:
 </body>
 ```
 ## Version History
+**v0.0.2**
+- Absolute filepaths are resolved to the project root directory
+
 **v0.0.1**
 - Path resolution between the current directory and current filepath accounts for sequential "sameness" in the filepaths
 

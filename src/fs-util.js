@@ -72,7 +72,34 @@ function getProjectRoot() {
  * @returns {String}
  */
 function resolve(...paths) {
-  return PATH.normalize(PATH.resolve(...paths));
+  let a = [];
+  for ( let i = 0; i < paths.length; ++i ) {
+    const currpath = PATH.normalize(paths[i]);
+    const seppath = currpath.split(PATH.sep);
+    // if the current path is an absolute path, replace the path array
+    if ( PATH.isAbsolute(currpath) ) {
+      a = seppath;
+    }
+    // else if the path array is empty, append the current path
+    else if ( !a.length ) {
+      a = a.concat(seppath);
+    }
+    // Otherwise parse each individual path descriptor
+    else { 
+      for ( let j = 0; j < seppath.length; ++j ) {
+        const p = seppath[j];
+        // Move up one level 
+        if ( p === '..' ) {
+          a.pop();
+        }
+        // Otherwise push d if it isn't an empty string
+        else if ( p ) {
+          a.push(p);
+        }
+      }
+    }
+  }
+  return a.join(PATH.sep);
 }
 
 /**
@@ -84,10 +111,6 @@ function resolve(...paths) {
 function mergePaths(p1, p2) {
   p1 = PATH.normalize(p1);
   p2 = PATH.normalize(p2);
-
-  if ( PATH.isAbsolute(p2) ) {
-    return p2;
-  }
   
   const A = p1.split(PATH.sep);
   const B = [];
@@ -101,7 +124,7 @@ function mergePaths(p1, p2) {
       A.pop();
     }
     // Otherwise push d if it isn't an empty string
-    else if ( p && p !== '.' ) {
+    else if ( p ) {
       B.push(p);
     }
   }
@@ -141,10 +164,7 @@ function mergePaths(p1, p2) {
  */
 function resolveToProjectPath(...paths) {
   const rpath = resolve(...paths);
-  if ( PATH.isAbsolute(rpath) ) {
-    return rpath;
-  }
-  return resolve(getProjectRoot(), rpath);
+  return mergePaths(getProjectRoot(), rpath);
 }
 
 function currdir(path) {
