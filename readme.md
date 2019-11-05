@@ -1,4 +1,4 @@
-# Runesmith v0.0.2
+# Runesmith v0.0.3
 Parse and compile html files
 ---
 ## Install
@@ -168,6 +168,9 @@ Result:
 </body>
 ```
 ## Version History
+**v0.0.3**
+- Merging paths now account for partial matches
+
 **v0.0.2**
 - Absolute filepaths are resolved to the project root directory
 
