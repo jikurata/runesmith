@@ -1,15 +1,15 @@
 {
   "name": "runesmith",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Parse and compile html files",
   "main": "index.js",
   "repository": "https://github.com/jikurata/runesmith",
   "scripts": {
-    "test:util": "node ./test/util.test.js",
-    "test:rune": "node ./test/rune.test.js",
-    "test:runesmith": "node ./test/runesmith.test.js",
-    "test:index": "node ./test/index.test.js",
-    "test": "npm run test:util && npm run test:rune && npm run test:runesmith && npm run test:index"
+    "test:util": "node ./_test/util.test.js",
+    "test:rune": "node ./_test/rune.test.js",
+    "test:runesmith": "node ./_test/runesmith.test.js",
+    "test:index": "node ./_test/index.test.js",
+    "test": "node ./_test/test.js"
   },
   "keywords": [
     "runesmith",

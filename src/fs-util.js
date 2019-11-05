@@ -72,34 +72,66 @@ function getProjectRoot() {
  * @returns {String}
  */
 function resolve(...paths) {
-  let a = [];
-  for ( let i = 0; i < paths.length; ++i ) {
-    const currpath = PATH.normalize(paths[i]);
-    const seppath = currpath.split(PATH.sep);
-    // if the current path is an absolute path, replace the path array
-    if ( PATH.isAbsolute(currpath) ) {
-      a = seppath;
+  return PATH.normalize(PATH.resolve(...paths));
+}
+
+/**
+ * Merge two arrays at the index in which they are sequentially equal
+ * @param {String} p1 
+ * @param {String} p2
+ * @returns {String}
+ */
+function mergePaths(p1, p2) {
+  p1 = PATH.normalize(p1);
+  p2 = PATH.normalize(p2);
+
+  if ( PATH.isAbsolute(p2) ) {
+    return p2;
+  }
+  
+  const A = p1.split(PATH.sep);
+  const B = [];
+
+  const b = p2.split(PATH.sep);
+  // Check the second path for relative path syntaxes
+  for ( let i = 0; i < b.length; ++i ) {
+    const p = b[i];
+    // Move up one level 
+    if ( p === '..' ) {
+      A.pop();
     }
-    // else if the path array is empty, append the current path
-    else if ( !a.length ) {
-      a = a.concat(seppath);
-    }
-    // Otherwise parse each individual path descriptor
-    else { 
-      for ( let j = 0; j < seppath.length; ++j ) {
-        const d = seppath[j];
-        // Move up one level 
-        if ( d === '..' ) {
-          a.pop();
-        }
-        // Otherwise push d if it isn't an empty string
-        else if ( d ) {
-          a.push(d);
-        }
-      }
+    // Otherwise push d if it isn't an empty string
+    else if ( p && p !== '.' ) {
+      B.push(p);
     }
   }
-  return a.join(PATH.sep);
+
+  const index = A.indexOf(B[0]);
+  // If array1 contains the first element of array 2, begin comparing for sameness starting at index
+  if ( index > -1 ) {
+    // Once a match is found, all subsequent indexes of both arrays must have matching values until the end of either array is reached
+    let sequentialMatch = true;
+    for ( let i = 0; i < B.length; ++i ) {
+      const indexA = index + i;
+      // Stop comparing if at the end of a1
+      if ( indexA >= A.length - 1 ) {
+        break;
+      }
+      // Paths are not sequentially the same
+      if ( B[i] !== A[indexA] ) {
+        sequentialMatch = false;
+        break;
+      }
+    }
+
+    // Merge the matches 
+    if ( sequentialMatch ) {
+      const merged = A.slice(0, index);
+      return PATH.join(merged.join(PATH.sep), B.join(PATH.sep));
+    }
+  }
+
+  return PATH.join(p1, p2);
 }
 
 /**
@@ -128,8 +160,11 @@ function currdir(path) {
  * @returns {String}
  */
 function readHtmlFile(path, encoding = 'utf8') {
-  if ( !pathExists(path) || !isHtmlFile(path) ) {
-    throw new Error(`${path} is not a valid html file path`);
+  if ( !pathExists(path) ) {
+    throw new Error(`Invalid Html File: ${path} does not exist.`);
+  }
+  if ( !isHtmlFile(path) ) {
+    throw new Error(`Invalid Html File: ${path} is not an html file.`);
   }
 
   return FS.readFileSync(path, {'encoding': encoding, 'flag': 'r'});
@@ -139,6 +174,7 @@ module.exports = {
   pathExists: pathExists,
   isHtmlFile: isHtmlFile,
   getProjectRoot: getProjectRoot,
+  mergePaths: mergePaths,
   resolve: resolve,
   resolveToProjectPath: resolveToProjectPath,
   readHtmlFile: readHtmlFile,

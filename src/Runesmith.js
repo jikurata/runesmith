@@ -208,7 +208,7 @@ class Runesmith extends EventEmitter {
     // TODO: Add type checks
     const currdir = options.currdir || fsUtil.getProjectRoot();
     const namespace = options.namespace || {};
-    const filepath = fsUtil.resolveToProjectPath(currdir, file);
+    const filepath = fsUtil.resolveToProjectPath(fsUtil.mergePaths(currdir, file));
     const fileStack = options.fileStack || [filepath];
     let content = '';
 
