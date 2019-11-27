@@ -1,4 +1,4 @@
-# Runesmith v0.0.4
+# Runesmith v0.0.5
 Parse and compile html files
 ---
 ## Install
@@ -174,6 +174,9 @@ Result:
 </body>
 ```
 ## Version History
+**v0.0.5**
+- Fixed misreference for the cache in main module.exports
+
 **v0.0.4**
 - Implement async compability for runes
 - Expose Runesmith.map to allow users to retrieve stats on the most recent compile

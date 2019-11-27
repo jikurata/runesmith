@@ -1,5 +1,5 @@
 const Runesmith = require('./src/Runesmith.js');
-const runesmith = new Runesmith();
+const rs = new Runesmith();
 
 /**
  * Compile the contents at the filepath
@@ -11,12 +11,12 @@ const runesmith = new Runesmith();
 function compile(filepath, options = {}) {
   if ( options.emptyCache ) {
     // Clear cache before compiling
-    const keys = Object.keys(runesmith.cache);
+    const keys = Object.keys(rs.cache);
     for ( let i = 0; keys.length; ++i ) {
-      delete runesmith.cache[keys[i]];
+      delete rs.cache[keys[i]];
     }
   }
-  return runesmith.compile(filepath);
+  return rs.compile(filepath);
 }
 
 /**
@@ -27,9 +27,9 @@ function compile(filepath, options = {}) {
  * @param {Function} handler 
  */
 function rune(handler) {
-  runesmith.rune('custom', handler);
+  rs.rune('custom', handler);
 }
 
 module.exports = compile;
 module.exports.rune = rune;
-module.exports.map = runesmith.map;
+module.exports.map = rs.map;

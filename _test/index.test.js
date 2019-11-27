@@ -6,7 +6,7 @@ const Runesmith = require('../index.js');
 Taste('Compile method')
 .test('Ensure root export of index invokes compile',
 profile => {
-  profile.compileResult = Runesmith('_test/test-example/test-compile.html');
+  profile.compileResult = Runesmith('_test/test-example/test-compile.html', {emptyCache: true});
 })
 .expect('compileResult').toBeTruthy();
 
