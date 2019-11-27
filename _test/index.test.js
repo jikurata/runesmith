@@ -2,15 +2,12 @@
 const Taste = require('@jikurata/taste');
 const Runesmith = require('../index.js');
 
-const test = new Promise((resolve, reject) => {
-  // Compile test
-  Taste.flavor('Compile method')
-  .describe('Ensure index invokes compile')
-  .test(profile => {
-    profile.compileResult = Runesmith('_test/test-example/test-compile.html');
-    resolve();
-  })
-  .expect('compileResult').toBeTruthy();
-});
+// Compile test
+Taste('Compile method')
+.test('Ensure root export of index invokes compile',
+profile => {
+  profile.compileResult = Runesmith('_test/test-example/test-compile.html');
+})
+.expect('compileResult').toBeTruthy();
 
-module.exports = test;
+module.exports = Taste;
