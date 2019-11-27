@@ -20,12 +20,22 @@ class Rune extends EventEmitter {
   /**
    * Executes the handler function
    * @param {ParsedHTMLDocument} document
-   * @returns {ParsedHTMLDocument}
+   * @returns {Promise<ParsedHTMLDocument>}
    */
   inscribe(document) {
-    Errors.TypeError.check(this.handler, 'function');
-    this.handler(document);
-    return document;
+    return new Promise((resolve, reject) => {
+      Errors.TypeError.check(this.handler, 'function');
+      const returnValue = this.handler(document);
+      // If the handler returns a Promise, wait for the promise to resolve
+      if ( returnValue instanceof Promise ) {
+        returnValue
+        .then(() => resolve(document))
+        .catch(err => reject(err))
+      }
+      else {
+        resolve(document);
+      }
+    });
   }
 }
 

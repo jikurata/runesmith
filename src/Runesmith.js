@@ -115,50 +115,66 @@ class Runesmith extends EventEmitter {
     });
 
     // Import rune
-    this.rune('import', (document) => {
+    this.rune('import', (document) => new Promise((resolve, reject) => {
       if ( !document.fileStack ) {
         document.fileStack = [];
       }
       const currdir = document.currdir || fsUtil.getProjectRoot();
       const namespace = document.namespace || {};
 
-      // Parse import elements
-      let importElements = document.getElementsByTagName('import');
-      while ( importElements.length ) {
-        const importElement = importElements.pop();
-        const src = importElement.getAttribute('src');
-        const filepath = fsUtil.resolveToProjectPath(currdir, src);
+      // Iterate through each import element sequentially
+      const importIterator = (queue) => {
+        return new Promise((resolveItr, rejectItr) => {
+          if ( !queue.length ) {
+            return resolveItr();
+          }
 
-        // Check for circular imports
-        Errors.CircularCompileError.check(document.fileStack, filepath);
-        document.fileStack.push(filepath);
+          const importElement = queue.pop();
+          const src = importElement.getAttribute('src');
+          const filepath = fsUtil.resolveToProjectPath(currdir, src);
 
-        let importHtml = this.compile(filepath, {
-          fileStack: document.fileStack,
-          currdir: currdir,
-          namespace: namespace
+          // Check for circular imports
+          Errors.CircularCompileError.check(document.fileStack, filepath);
+          document.fileStack.push(filepath);
+          
+          this.compile(filepath, {
+            fileStack: document.fileStack,
+            currdir: currdir,
+            namespace: namespace
+          })
+          .then(result => {
+            let importHtml = result;
+
+            // Convert the imported html into a htmldocument
+            const importDocument = document.parse(importHtml);
+            importDocument.config({trimWhitespace: document.trimWhitespace});
+            
+            // Append the innerHTML of the import tag into any content tags in the import
+            const contentElements = importDocument.getElementsByTagName('content');
+            for ( let i = 0; i < contentElements.length; ++i ) {
+              const element = contentElements[i];
+              element.parent.replaceChild(element, importElement.children);
+              importDocument.deleteElement(element);
+            }
+    
+            // Replace import tag with its compiled import
+            importElement.parent.replaceChild(importElement, importDocument.fragment.children);
+            document.deleteElement(importElement);
+            
+            // Update the array of import elements
+            importElements = document.getElementsByTagName('import');
+            
+            resolveItr();
+          })
+          .catch(err => rejectItr(err));
         });
+      };
 
-        // Convert the imported html into a htmldocument
-        const importDocument = document.parse(importHtml);
-        importDocument.config({trimWhitespace: document.trimWhitespace});
-
-        // Append the innerHTML of the import tag into any content tags in the import
-        const contentElements = importDocument.getElementsByTagName('content');
-        for ( let i = 0; i < contentElements.length; ++i ) {
-          const element = contentElements[i];
-          element.parent.replaceChild(element, importElement.children);
-          importDocument.deleteElement(element);
-        }
-
-        // Replace import tag with its compiled import
-        importElement.parent.replaceChild(importElement, importDocument.fragment.children);
-        document.deleteElement(importElement);
-        
-        // Update the array of import elements
-        importElements = document.getElementsByTagName('import');
-      }
-    });
+      // Pass a queue of import elements into the iterator
+      importIterator(document.getElementsByTagName('import'))
+      .then(resolve)
+      .catch(reject);
+    }));
   }
 
   /**
@@ -187,22 +203,40 @@ class Runesmith extends EventEmitter {
   /**
    * Calls all runes associated with the tag
    * @param {String} tag 
-   * @param {ParsedHTMLDocument} document 
+   * @param {ParsedHTMLDocument} document
+   * @returns {Promise<Void>}
    */
   invoke(tag, document) {
-    if ( this.runes.hasOwnProperty(tag) ) {
-      const runes = this.runes[tag];
-      for ( let i = 0; i < runes.length; ++i ) {
-        const rune = runes[i];
-        rune.inscribe(document);
+    const runeIterator = (queue) => {
+      return new Promise((resolve, reject) => {
+        if ( !queue.length ) {
+          return resolve();
+        }
+        
+        const rune = queue.shift();
+        rune.inscribe(document)
+        .then(() => runeIterator(queue))
+        .then(() => resolve)
+        .catch(reject);
+      });
+    };
+
+    return new Promise((resolve, reject) => {
+      if ( this.runes.hasOwnProperty(tag) ) {
+        runeIterator(this.runes[tag])
+        .then(resolve)
+        .catch(reject);
       }
-    }
+      else {
+        resolve();
+      }
+    });
   }
 
   /**
    * Parses and compiles the file or string.
    * @param {String|Filepath} file 
-   * @returns {String}
+   * @returns {Promise<String>}
    */
   compile(file, options = {}) {
     // TODO: Add type checks
@@ -236,36 +270,42 @@ class Runesmith extends EventEmitter {
       created: new Date().toISOString()
     };
 
-    content = this.parse(document);
+    return this.parse(document)
+    .then(result => {
+      content = result
         
-    document.fileStack.pop();
-
-    this.map[filepath].namespace = document.namespace;
-    this.map[filepath].contentLength = content.length;
-
-    return content;
+      document.fileStack.pop();
+  
+      this.map[filepath].namespace = document.namespace;
+      this.map[filepath].contentLength = content.length;
+  
+      return content;
+    });
   }
 
+  /**
+   * Passes the document into each rune handler
+   * @param {ParsedHTMLDocument} document
+   * @returns {Promise<String>}
+   */
   parse(document) {
-    // Pass the document through the namespace rune
-    this.invoke('namespace', document);
-    
-    // Pass the document through the var rune
-    this.invoke('var', document);
-
-    // Pass the document through the import rune
-    this.invoke('import', document);
-
-    // Pass the document through any custom runes
-    const keys = Object.keys(this.runes);
-    for ( let i = 0; i < keys.length; ++i ) {
-      const key = keys[i];
-      if ( key !== 'namespace' && key !== 'var' && key !== 'import' ) {
-        this.invoke(key, document);
+    // Pass document through default runes first
+    return this.invoke('namespace', document)
+    .then(() => this.invoke('var', document))
+    .then(() => this.invoke('import', document))
+    .then(() => {
+      const promises = [];
+      // Pass the document through any custom runes
+      const keys = Object.keys(this.runes);
+      for ( let i = 0; i < keys.length; ++i ) {
+        const key = keys[i];
+        if ( key !== 'namespace' && key !== 'var' && key !== 'import' ) {
+          promises.push(this.invoke(key, document));
+        }
       }
-    }
-
-    return document.stringify();
+      return Promise.all(promises);
+    })
+    .then(() => document.stringify());
   }
 }
 
