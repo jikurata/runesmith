@@ -19,9 +19,9 @@
   "author": "jikurata",
   "license": "ISC",
   "devDependencies": {
-    "@jikurata/taste": "0.0.6"
+    "@jikurata/taste": "^1.1.0"
   },
   "dependencies": {
-    "@jikurata/html-parser": "0.0.4"
+    "@jikurata/html-parser": "^0.0.5"
   }
 }
