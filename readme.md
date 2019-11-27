@@ -1,4 +1,4 @@
-# Runesmith v0.0.5
+# Runesmith v0.0.6
 Parse and compile html files
 ---
 ## Install
@@ -11,7 +11,8 @@ npm install runesmith
 ```
 const Runesmith = require('runesmith');
 
-const result = Runesmith(file/path/to/some/file.html); // returns compiled html as a String
+Runesmith(file/path/to/some/file.html)
+.then(html => ... ); // returns compiled html as a String
 ```
 ## Parsing HTML
 ---
@@ -174,6 +175,9 @@ Result:
 </body>
 ```
 ## Version History
+**v0.0.6**
+- Refactor cache emptying to a separate function in module.exports
+
 **v0.0.5**
 - Fixed misreference for the cache in main module.exports
 
