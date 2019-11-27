@@ -4,9 +4,18 @@ const runesmith = new Runesmith();
 /**
  * Compile the contents at the filepath
  * @param {String} filepath
+ * @param {Object} options
+ * options.emptyCache {Boolean}: Set to true to empty cache before compiling
  * @returns {String}
  */
-function compile(filepath) {
+function compile(filepath, options = {}) {
+  if ( options.emptyCache ) {
+    // Clear cache before compiling
+    const keys = Object.keys(runesmith.cache);
+    for ( let i = 0; keys.length; ++i ) {
+      delete runesmith.cache[keys[i]];
+    }
+  }
   return runesmith.compile(filepath);
 }
 
@@ -23,4 +32,4 @@ function rune(handler) {
 
 module.exports = compile;
 module.exports.rune = rune;
-
+module.exports.map = runesmith.map;
