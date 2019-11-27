@@ -111,6 +111,12 @@ Runesmith.rune((document) => {
     }
 });
 ```
+To implement asynchronous parsers, simply return a Promise for the rune handler:
+```
+    Runesmmith.rune((document) => new Promise((resolve, reject) => {
+        // async operations here...
+    }));
+```
 The special namespace, var, and import tags all have priority over other parsers, so those tags will be resolved first before any custom parsers are executed.
 ## Putting it all together
 ---
@@ -169,7 +175,9 @@ Result:
 ```
 ## Version History
 **v0.0.4**
-- 
+- Implement async compability for runes
+- Expose Runesmith.map to allow users to retrieve stats on the most recent compile
+- The file cache can now be emptied by passing {emptyCache: true} as an argument
 
 **v0.0.3**
 - Merging paths now account for partial matches
