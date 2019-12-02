@@ -15,12 +15,7 @@ class Runesmith extends EventEmitter {
       writable: false,
       configurable: false
     });
-    Object.defineProperty(this, 'map', {
-      value: {},
-      enumerable: true,
-      writable: false,
-      configurable: false
-    });
+    this.map = {};
     this.cache = {};
     this[init]();
   }
@@ -308,6 +303,10 @@ class Runesmith extends EventEmitter {
       .then(() => resolve(document.stringify()))
       .catch(err => reject(err));
     });
+  }
+
+  clearMap() {
+    this.map = {};
   }
 
   emptyCache() {

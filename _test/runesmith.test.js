@@ -20,4 +20,16 @@ Taste('Detect circular dependencies')
 })
 .expect('error').toBeInstanceOf(Errors.CircularCompileError)
 
+Taste('Empty cache')
+.test(profile => {
+  const runesmith = new Runesmith();
+  runesmith.compile('_test/test-example/test-compile.html')
+  .then(() => runesmith.emptyCache())
+  .then(() => {
+    profile.cache = Object.keys(runesmith.cache).length;
+  })
+  .catch(err => profile.cache = err);
+})
+.expect('cache').toEqual(0);
+
 module.exports = Taste;

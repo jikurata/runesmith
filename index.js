@@ -7,6 +7,7 @@ const rs = new Runesmith();
  * @returns {Promise<String>}
  */
 function compile(filepath) {
+  rs.clearMap();
   return rs.compile(filepath);
 }
 
