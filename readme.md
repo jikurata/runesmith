@@ -1,4 +1,4 @@
-# Runesmith v0.0.6
+# Runesmith v0.0.7
 Parse and compile html files
 ---
 ## Install
@@ -175,6 +175,9 @@ Result:
 </body>
 ```
 ## Version History
+**v0.0.7**
+- Runesmith now clears the compile map before each compilation
+
 **v0.0.6**
 - Refactor cache emptying to a separate function in module.exports
 
