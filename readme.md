@@ -1,4 +1,4 @@
-# Runesmith v0.0.7
+# Runesmith v0.0.8
 Parse and compile html files
 ---
 ## Install

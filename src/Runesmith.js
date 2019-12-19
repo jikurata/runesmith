@@ -1,15 +1,24 @@
 'use strict';
 const EventEmitter = require('events');
 const htmlParser = require('@jikurata/html-parser');
+const Path = require('path');
 const fsUtil = require('./fs-util.js');
 const Errors = require('./Error.js');
 const Rune = require('./Rune.js');
 const init = Symbol('init');
 
+htmlParser.config({trimWhitespace: true});
+
 class Runesmith extends EventEmitter {
   constructor() {
     super();
     Object.defineProperty(this, 'runes', {
+      value: {},
+      enumerable: true,
+      writable: false,
+      configurable: false
+    });
+    Object.defineProperty(this, '_config', {
       value: {},
       enumerable: true,
       writable: false,
@@ -23,6 +32,8 @@ class Runesmith extends EventEmitter {
   [init]() {
     // Namespace rune
     this.rune('namespace', (document) => {
+      htmlParser.config({trimWhitespace: false});
+
       if ( !document.hasOwnProperty('namespace') ) {
         document.namespace = {};
       }
@@ -31,14 +42,12 @@ class Runesmith extends EventEmitter {
       for ( let i = 0; i < namespaceElements.length; ++i ) {
         const element = namespaceElements[i];
         // Set namespace configurations from element attributes
-        const delimiterString = (element.attributes.hasOwnProperty('delimiter') && element.getAttribute('delimiter').trim()) 
-          ? element.getAttribute('delimiter').replace(/\s+/g, ' ') : '';
-        const pairString = (element.attributes.hasOwnProperty('pair') && element.getAttribute('pair').trim()) 
-          ? element.getAttribute('pair').replace(/\s+/g, ' ') : '';
-        const delimiters = (delimiterString) ? delimiterString.split(' ') : ['\\n', ',', ';'];
-        const pairDelimiters = (pairString) ? pairString.split(' ') : [':', '='];
-        const overwrite = (element.attributes.hasOwnProperty('overwrite') && element.getAttribute('overwrite')) 
-          ? element.getAttribute('overwrite').trim() === 'true' : true;
+        const delimiterString = element.hasAttribute('delimiter') ? element.getAttribute('delimiter').trim().replace(/\s+/g, ' ') : '';
+        const pairString = element.hasAttribute('pair') ? element.getAttribute('pair').trim().replace(/\s+/g, ' ') : '';
+
+        const delimiters = delimiterString ? delimiterString.split(' ') : ['\\n', ',', ';'];
+        const pairDelimiters = pairString ? pairString.split(' ') : [':', '='];
+        const overwrite = element.hasAttribute('overwrite') ? element.getAttribute('overwrite').trim() === 'true' : true;
   
         if ( !element.hasOwnProperty('namespace') ) {
           element.namespace = {};
@@ -59,7 +68,6 @@ class Runesmith extends EventEmitter {
   
         // Retrieve inner content of namespace element
         const content = element.innerHTML;
-  
         // Split the inner content of the namespace element
         const pairs = content.split(delimiterRegex).filter(pair => pair.trim() !== '');
         for ( let i = 0; i < pairs.length; ++i ) {
@@ -80,8 +88,10 @@ class Runesmith extends EventEmitter {
         }
 
         // Remove the namespace element from the document
-        document.removeChildren(element);
+        document.removeChild(element);
       }
+
+      htmlParser.config({trimWhitespace: true});
     });
 
     // Var rune
@@ -97,7 +107,7 @@ class Runesmith extends EventEmitter {
         if ( namespace.hasOwnProperty(content) ) {
           const parent = element.parent;
           if ( parent ) {
-            const replacement = document.createTextElement(namespace[content]);
+            const replacement = document.createTextNode(namespace[content]);
             parent.replaceChild(element, replacement);
           }
         }
@@ -135,20 +145,17 @@ class Runesmith extends EventEmitter {
           let importHtml = result;
 
           // Convert the imported html into a htmldocument
-          const importDocument = document.parse(importHtml);
-          importDocument.config({trimWhitespace: document.trimWhitespace});
+          const importDocument = htmlParser(importHtml);
           
           // Append the innerHTML of the import tag into any content tags in the import
           const contentElements = importDocument.getElementsByTagName('content');
           for ( let i = 0; i < contentElements.length; ++i ) {
             const element = contentElements[i];
             element.parent.replaceChild(element, importElement.children);
-            importDocument.deleteElement(element);
           }
   
           // Replace import tag with its compiled import
-          importElement.parent.replaceChild(importElement, importDocument.fragment.children);
-          document.deleteElement(importElement);
+          importElement.parent.replaceChild(importElement, importDocument.children);
           
           // Update the queue of import elements
           queue = document.getElementsByTagName('import');
@@ -232,6 +239,7 @@ class Runesmith extends EventEmitter {
     return new Promise((resolve, reject) => {
       // TODO: Add type checks
       const currdir = options.currdir || fsUtil.getProjectRoot();
+      const relativePath = Path.relative(currdir, file);
       const namespace = options.namespace || {};
       const filepath = fsUtil.resolveToProjectPath(fsUtil.mergePaths(currdir, file));
       const fileStack = options.fileStack || [filepath];
@@ -303,6 +311,16 @@ class Runesmith extends EventEmitter {
       .then(() => resolve(document.stringify()))
       .catch(err => reject(err));
     });
+  }
+
+  config(obj ={}) {
+    const fields = Object.keys(obj);
+    for ( let i = 0; i < fields.length; ++i ) {
+      const field = fields[i];
+      this._config[field] = obj[field];
+    }
+
+    return this._config;
   }
 
   clearMap() {

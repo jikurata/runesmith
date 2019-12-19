@@ -27,6 +27,7 @@ function emptyCache() {
 }
 
 module.exports = compile;
+module.exports.config = rs.config;
 module.exports.rune = rune;
 module.exports.map = rs.map;
 module.exports.emptyCache = emptyCache;

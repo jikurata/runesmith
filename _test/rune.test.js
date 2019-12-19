@@ -3,6 +3,8 @@ const Taste = require('@jikurata/taste');
 const htmlParser = require('@jikurata/html-parser');
 const Runesmith = require('../src/Runesmith.js');
 
+htmlParser.config({trimWhitespace: true});
+
 Taste('Expanding the Runesmith vocabulary')
 .test(profile => {
   const runesmith = new Runesmith();
@@ -96,7 +98,6 @@ profile => {
     <var>bar</var>
   `;
   const document = htmlParser(content);
-  document.config({trimWhitespace: true});
   document.namespace = {foo: 'bar', bar: 'baz'};
   rune.inscribe(document);
   profile.html = document.stringify();
@@ -115,7 +116,6 @@ profile => {
     </import>
   `;
   const document = htmlParser(content);
-  document.config({trimWhitespace: true});
   rune.inscribe(document)
   .then(() => {
     profile.html = document.stringify().trim();
@@ -138,7 +138,6 @@ profile => {
     </import>
   `;
   const document = htmlParser(content);
-  document.config({trimWhitespace: true});
   rune.inscribe(document)
   .then(() => {
     profile.html = document.stringify().trim();

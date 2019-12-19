@@ -8,7 +8,7 @@ const PATH = require('path');
  * @returns {Boolean}
  */
 function pathExists(path) {
-  path = PATH.normalize(path);
+  path = normalize(path);
   return FS.existsSync(path); 
 }
 
@@ -18,7 +18,7 @@ function pathExists(path) {
  * @returns {Boolean}
  */
 function isFile(path) {
-  path = PATH.normalize(path);
+  path = normalize(path);
   return pathExists(path) && FS.statSync(path).isFile();
 }
   
@@ -33,7 +33,7 @@ function isHtmlFile(path) {
 }
 
 function getFileType(path) {
-  path = PATH.normalize(path);
+  path = normalize(path);
   return PATH.extname(path);
 }
 
@@ -43,7 +43,7 @@ function getFileType(path) {
  * @returns {String}
  */
 function getProjectRoot() {
-  let path = PATH.normalize(process.cwd());
+  let path = normalize(process.cwd());
   if ( isFile(path) ) {
     path = PATH.dirname(path);
   }
@@ -64,6 +64,10 @@ function getProjectRoot() {
   return null;
 }
 
+function normalize(path) {
+  return path.replace(/\\|\//g, PATH.sep);
+}
+
 /**
  * Resolves multiple paths into a single path
  * Any succeeding absolute paths will overwrite the resulting path
@@ -74,27 +78,23 @@ function getProjectRoot() {
 function resolve(...paths) {
   let a = [];
   for ( let i = 0; i < paths.length; ++i ) {
-    const currpath = PATH.normalize(paths[i]);
-    const seppath = currpath.split(PATH.sep);
-    // if the current path is an absolute path, replace the path array
-    if ( PATH.isAbsolute(currpath) ) {
-      a = seppath;
+    const currpath = normalize(paths[i]).trim();
+    const levels = currpath.split(PATH.sep);
+    // if path starts with a directory or filename or is absolute, replace the entire path string
+    if ( (levels[0] && levels[0] !== '.' && levels[0] !== '..' ) || PATH.isAbsolute(currpath) ) {
+      a = levels;
     }
-    // else if the path array is empty, append the current path
-    else if ( !a.length ) {
-      a = a.concat(seppath);
-    }
-    // Otherwise parse each individual path descriptor
-    else { 
-      for ( let j = 0; j < seppath.length; ++j ) {
-        const p = seppath[j];
-        // Move up one level 
-        if ( p === '..' ) {
+    else {
+      for ( let j = 0; j < levels.length; ++j ) {
+        const level = levels[j];
+        if ( !a.length ) {
+          a.push(level);
+        }
+        else if ( level === '..' ) {
           a.pop();
         }
-        // Otherwise push d if it isn't an empty string
-        else if ( p ) {
-          a.push(p);
+        else if ( level && level !== '.' ) {
+          a.push(level);
         }
       }
     }
@@ -109,9 +109,9 @@ function resolve(...paths) {
  * @returns {String}
  */
 function mergePaths(p1, p2) {
-  p1 = PATH.normalize(p1);
-  p2 = PATH.normalize(p2);
-  
+  p1 = normalize(p1);
+  p2 = normalize(p2);
+
   const A = p1.split(PATH.sep);
   const B = [];
 
@@ -187,6 +187,7 @@ module.exports = {
   isHtmlFile: isHtmlFile,
   getProjectRoot: getProjectRoot,
   mergePaths: mergePaths,
+  normalize: normalize,
   resolve: resolve,
   resolveToProjectPath: resolveToProjectPath,
   readHtmlFile: readHtmlFile,
