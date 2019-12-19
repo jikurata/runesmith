@@ -154,6 +154,9 @@ function mergePaths(p1, p2) {
  */
 function resolveToProjectPath(...paths) {
   const rpath = resolve(...paths);
+  if ( PATH.isAbsolute(rpath) ) {
+    return rpath;
+  }
   return mergePaths(getProjectRoot(), rpath);
 }
 

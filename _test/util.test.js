@@ -63,9 +63,9 @@ Taste('Resolving to project root directory')
   profile.root4 = fsUtil.resolveToProjectPath(root, '/path');
 })
 .expect('root1').toEqual(fsUtil.normalize(PATH.join(root, 'this/is/a/path')))
-.expect('root2').toEqual(fsUtil.normalize(PATH.join(root, 'absolute/path')))
+.expect('root2').toEqual(fsUtil.normalize('/absolute/path'))
 .expect('root3').toEqual(fsUtil.normalize(PATH.join(root, 'd/e/f')))
-.expect('root4').toEqual(fsUtil.normalize(PATH.join(root, 'path')));
+.expect('root4').toEqual(fsUtil.normalize('/path'));
 
 Taste('FS file reading')
 .test('Only read html/htm files',

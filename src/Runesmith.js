@@ -7,8 +7,6 @@ const Errors = require('./Error.js');
 const Rune = require('./Rune.js');
 const init = Symbol('init');
 
-htmlParser.config({trimWhitespace: true});
-
 class Runesmith extends EventEmitter {
   constructor() {
     super();
@@ -19,7 +17,9 @@ class Runesmith extends EventEmitter {
       configurable: false
     });
     Object.defineProperty(this, '_config', {
-      value: {},
+      value: {
+        trimWhitespace: true
+      },
       enumerable: true,
       writable: false,
       configurable: false
@@ -32,6 +32,7 @@ class Runesmith extends EventEmitter {
   [init]() {
     // Namespace rune
     this.rune('namespace', (document) => {
+      // Disable trimwhitespace for htmlparser so newlines can be identified
       htmlParser.config({trimWhitespace: false});
 
       if ( !document.hasOwnProperty('namespace') ) {
@@ -91,7 +92,7 @@ class Runesmith extends EventEmitter {
         document.removeChild(element);
       }
 
-      htmlParser.config({trimWhitespace: true});
+      htmlParser.config(this._config);
     });
 
     // Var rune
@@ -255,6 +256,7 @@ class Runesmith extends EventEmitter {
         this.cache[filepath] = html;
       }
 
+      htmlParser.config(this._config);
       const document = htmlParser(html);
       document.fileStack = fileStack;
       document.namespace = namespace;
@@ -318,7 +320,7 @@ class Runesmith extends EventEmitter {
    * @param {Object} obj
    * @returns {Object}
    */
-  config(obj ={}) {
+  config(obj = {}) {
     const fields = Object.keys(obj);
     for ( let i = 0; i < fields.length; ++i ) {
       const field = fields[i];
