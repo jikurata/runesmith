@@ -178,9 +178,10 @@ Result:
 **v0.0.8**
 - Parser now utilizes a tree-like data structure instead of an array, which should improve compile speed
 - Modified filepath parsing behavior within the import tags:
-    - filepaths that start with a directory or text are now treated as a filepath relative to the project root.
-        Ex. a/b/c => *project root*/a/b/c
-    - absolute file paths are now treated as true absolute filepaths, to enable access to files outside the project root
+    - Filepaths that start with a directory or text are now treated as a filepath relative to the project root.
+        - Ex. a/b/c => *project root*/a/b/c
+    - Absolute file paths are now treated as true absolute filepaths, to enable access to files outside the project root
+        - Ex. /a/b/c => /a/b/c
 
 **v0.0.7**
 - Runesmith now clears the compile map before each compilation
