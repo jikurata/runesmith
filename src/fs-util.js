@@ -80,22 +80,20 @@ function resolve(...paths) {
   for ( let i = 0; i < paths.length; ++i ) {
     const currpath = normalize(paths[i]).trim();
     const levels = currpath.split(PATH.sep);
-    // if path starts with a directory or filename or is absolute, replace the entire path string
+    // if path starts with a directory or filename or is absolute, reset the path string
     if ( (levels[0] && levels[0] !== '.' && levels[0] !== '..' ) || PATH.isAbsolute(currpath) ) {
-      a = levels;
+      a = [];
     }
-    else {
-      for ( let j = 0; j < levels.length; ++j ) {
-        const level = levels[j];
-        if ( !a.length ) {
-          a.push(level);
-        }
-        else if ( level === '..' ) {
-          a.pop();
-        }
-        else if ( level && level !== '.' ) {
-          a.push(level);
-        }
+    for ( let j = 0; j < levels.length; ++j ) {
+      const level = levels[j];
+      if ( !a.length ) {
+        a.push(level);
+      }
+      else if ( level === '..' ) {
+        a.pop();
+      }
+      else if ( level && level !== '.' ) {
+        a.push(level);
       }
     }
   }

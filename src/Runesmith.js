@@ -313,6 +313,11 @@ class Runesmith extends EventEmitter {
     });
   }
 
+  /**
+   * Configure Runesmith
+   * @param {Object} obj
+   * @returns {Object}
+   */
   config(obj ={}) {
     const fields = Object.keys(obj);
     for ( let i = 0; i < fields.length; ++i ) {
